@@ -1,3 +1,7 @@
+from django.contrib import messages
+from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth.decorators import login_required
+from django.contrib.auth.models import User
 from django.db.models import Q
 from django.shortcuts import redirect, render
 
@@ -6,13 +10,42 @@ from .models import Room, Topic
 
 
 # Create your views here.
+def loginPage(request):
+    if request.method == "POST":
+        username = request.POST.get("username")
+        password = request.POST.get("password")
+
+        try:
+            user = User.objects.get(username=username)
+        except:
+            messages.error(request, "User does not exist.")
+
+        user = authenticate(request, username=username, password=password)
+
+        if user is not None:
+            login(request, user)
+            return redirect("home")
+        else:
+            messages.error(request, "Username or password does not exist")
+
+    context = {}
+    return render(request, "base/login_register.html", context)
+
+
+def logoutUser(request):
+    logout(request)
+    return redirect("home")
+
+
 def home(request):
     q = request.GET.get("q")
     if q is None:
         q = ""
 
     rooms = Room.objects.filter(
-        Q(topic__name__icontains=q) | Q(name__icontains=q) | Q(description__icontains=q)
+        Q(topic__name__icontains=q)
+        | Q(name__icontains=q)
+        | Q(description__icontains=q)
     )
     topics = Topic.objects.all()
     room_count = rooms.count()
@@ -26,6 +59,7 @@ def room(request, pk):
     return render(request, "base/room.html", context)
 
 
+@login_required(login_url="login")
 def createRoom(request):
     if request.method == "POST":
         form = RoomForm(request.POST)
