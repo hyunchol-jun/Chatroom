@@ -11,7 +11,6 @@ from .models import Message, Room, Topic, User
 
 # Create your views here.
 def registerUser(request):
-    form = MyUserCreationForm()
 
     if request.method == "POST":
         form = MyUserCreationForm(request.POST)
@@ -24,6 +23,7 @@ def registerUser(request):
         else:
             messages.error(request, "An error occurred during registration.")
 
+    form = MyUserCreationForm()
     return render(request, "base/login_register.html", {"form": form})
 
 

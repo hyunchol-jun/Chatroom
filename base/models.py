@@ -13,7 +13,6 @@ class User(AbstractUser):
     REQUIRED_FIELDS = []
 
 
-# Create your models here.
 class Topic(models.Model):
     name = models.CharField(max_length=200)
 
